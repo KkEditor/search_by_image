@@ -1,4 +1,4 @@
-import { Col, message, Row, Upload, UploadProps } from "antd";
+import { Col, message, Row, Spin, Upload, UploadProps } from "antd";
 import { RcFile, UploadFile } from "antd/es/upload";
 import { SyntheticEvent, useState } from "react";
 import "./app.scss";
@@ -23,17 +23,17 @@ export interface IData {
 }
 
 function App() {
-  const [file, setFile] = useState<any>({});
-  const [loadingPercentage, setLoadingPercentage] = useState(0);
   const [originFile, setOriginFile] = useState<UploadFile<any>>();
   const [currentImage, setCurrentImage] = useState<string>();
   const [isSubmitted, setIsSubmited] = useState(false);
   const [data, setData] = useState<IData[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState<IData>();
 
   const props: UploadProps = {
-    // showUploadList: false,
+    maxCount: 1,
+    showUploadList: false,
     async onChange(info) {
       console.log("day la change", info);
       const { status } = info.file;
@@ -43,7 +43,6 @@ function App() {
       if (status === "done") {
         const base64 = await getBase64(info.file.originFileObj as RcFile);
 
-        setFile(info.file);
         setCurrentImage(base64);
         setOriginFile(info.file);
         message.success(`${info.file.name} file uploaded successfully.`);
@@ -73,17 +72,24 @@ function App() {
   const reloadHandler = () => {
     setCurrentImage("");
     setData([]);
+    setSelectedImage(undefined);
     setIsSubmited(false);
   };
 
   const submitHandler = async (e: SyntheticEvent) => {
     e.preventDefault();
+
+    if (!currentImage) {
+      message.error(`You must upload 1 file (png,jpg)`);
+      return;
+    }
     setIsSubmited(true);
+    setLoading(true);
 
     const formData = new FormData();
     formData.append("image", originFile?.originFileObj as File);
     const response = await axios.post(
-      `http://ec2-3-0-19-91.ap-southeast-1.compute.amazonaws.com:2030/process_image`,
+      `http://ec2-18-136-120-15.ap-southeast-1.compute.amazonaws.com:2030/process_image`,
       formData,
       {
         headers: {
@@ -92,13 +98,13 @@ function App() {
       }
     );
 
+    setLoading(false);
+
     if (response) {
       setData(response.data);
       setSelectedImage(response.data[0]);
     }
   };
-
-  console.log("selected", selectedImage);
 
   const selectImageHandler = (dataImageSelected: IData) => {
     if (dataImageSelected) setSelectedImage(dataImageSelected);
@@ -110,16 +116,8 @@ function App() {
       })}
     >
       <form onSubmit={submitHandler}>
-        <Row
-          className="app-container"
-          gutter={[30, 30]}
-          style={{ position: "relative", transition: "all 2s" }}
-        >
-          <Col
-            span={12}
-            className="app-container__left"
-            style={{ position: "relative" }}
-          >
+        <Row className="app-container" gutter={[30, 30]}>
+          <Col span={12} className="app-container__left">
             <div className="app-container__left--card">
               <div>
                 <div className="app-container__left--card__logo">
@@ -134,7 +132,7 @@ function App() {
                 </p>
               </div>
 
-              <div className="flex justify-center">
+              <div className="app-container__left--card__img">
                 <img src={bg} alt="logo" />
               </div>
             </div>
@@ -158,8 +156,8 @@ function App() {
               <Row className={"upload-content__results"} gutter={[30, 30]}>
                 {selectedImage ? (
                   <Col span={24}>
-                    <h3>{selectedImage.name}</h3>
-                    <div>
+                    <h3 className="pt-3">{selectedImage.name}</h3>
+                    <div className="pt-3">
                       <Stars
                         ratingNumber={Number(selectedImage.review_avg_rate)}
                       />
@@ -170,34 +168,36 @@ function App() {
                       <span></span>
                     </div>
                     <a>Link sản phẩm để đây</a>
-
-                    <img
-                      className="upload-content__results--main-img"
-                      src={selectedImage.url}
-                      alt="currentImage"
-                    />
+                    <div className="flex justify-center">
+                      <div
+                        className="background-image"
+                        style={{
+                          backgroundImage: `url(${selectedImage.url})`,
+                        }}
+                      ></div>
+                    </div>
                   </Col>
                 ) : (
-                  <div>
-                    <p>Loading... {loadingPercentage}%</p>
-                  </div>
+                  <Col span={24} className="flex justify-center items-center">
+                    <Spin spinning={loading}></Spin>
+                  </Col>
                 )}
 
                 {data?.map((root) => (
                   <Col
+                    className="cursor-pointer"
                     span={4}
                     key={Number(root?.product_id)}
                     onClick={() => selectImageHandler(root)}
                   >
                     <div>
                       <img
-                        className={clsx({
+                        className={clsx("w-full", {
                           "image-selected":
                             root.product_id === selectedImage?.product_id,
                         })}
                         src={root?.url}
-                        style={{ width: "100%" }}
-                        alt="asd"
+                        alt={root.name}
                       />
                     </div>
                   </Col>
@@ -221,25 +221,13 @@ function App() {
                   }}
                 >
                   {currentImage ? (
-                    <div
-                      // style={{ maxHeight: "384px" }}
-                      className="upload-content__show-image"
-                    >
+                    <div className="upload-content__show-image">
                       <div
+                        className="background-image"
                         style={{
                           backgroundImage: `url(${currentImage})`,
-                          backgroundRepeat: "no-repeat",
-                          backgroundSize: "contain",
-                          width: "100%",
-                          backgroundPosition: "center center",
-                          height: "500px",
                         }}
                       ></div>
-                      {/* <img
-                        src={currentImage}
-                        style={{ width: "500px", height: "auto" }}
-                        alt="draggerImage"
-                      /> */}
                     </div>
                   ) : (
                     <div className="default-upload">
@@ -254,13 +242,18 @@ function App() {
 
                 <div className="btn-group flex">
                   <button
-                    className="btn-clear"
+                    disabled={loading}
+                    className={clsx("btn-clear", { "btn-disabled": loading })}
                     type="button"
                     onClick={reloadHandler}
                   >
                     <ReloadIcon />
                   </button>
-                  <button className="btn-submit" type="submit">
+                  <button
+                    className={clsx("btn-submit", { "btn-disabled": loading })}
+                    type="submit"
+                    disabled={loading}
+                  >
                     Submit
                   </button>
                 </div>
