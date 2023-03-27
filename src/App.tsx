@@ -35,10 +35,8 @@ function App() {
     maxCount: 1,
     showUploadList: false,
     async onChange(info) {
-      console.log("day la change", info);
       const { status } = info.file;
       if (status !== "uploading") {
-        console.log(info.file, info.fileList);
       }
       if (status === "done") {
         const base64 = await getBase64(info.file.originFileObj as RcFile);
@@ -49,9 +47,6 @@ function App() {
       } else if (status === "error") {
         message.error(`${info.file.name} file upload failed.`);
       }
-    },
-    onDrop(e) {
-      console.log("Dropped files", e.dataTransfer.files);
     },
   };
 
@@ -137,12 +132,7 @@ function App() {
               </div>
             </div>
           </Col>
-          <Col
-            span={12}
-            className={clsx("app-container__right", {
-              uploaded: !isSubmitted === false,
-            })}
-          >
+          <Col span={12} className="app-container__right">
             <div className="app-container__right--card">
               <div className="app-container__right--card-title">
                 <h2>
@@ -153,7 +143,7 @@ function App() {
                 </h2>
               </div>
 
-              <Row className={"upload-content__results"} gutter={[30, 30]}>
+              <Row className="upload-content__results" gutter={[30, 30]}>
                 {selectedImage ? (
                   <Col span={24}>
                     <h3 className="pt-3">{selectedImage.name}</h3>
