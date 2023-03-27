@@ -163,7 +163,13 @@ function App() {
                       </span>
                       <span></span>
                     </div>
-                    <a>Link sản phẩm để đây</a>
+                    <a
+                      href={`https://community.review-ty.com/search/products/${selectedImage.product_id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Link sản phẩm để đây
+                    </a>
                     <div className="flex justify-center">
                       <div
                         className="background-image"
