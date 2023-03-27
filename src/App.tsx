@@ -83,22 +83,23 @@ function App() {
 
     const formData = new FormData();
     formData.append("image", originFile?.originFileObj as File);
-    const response = await axios.post(
-      `http://ec2-18-136-120-15.ap-southeast-1.compute.amazonaws.com:2030/process_image`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-
-    setLoading(false);
-
-    if (response) {
-      setData(response.data);
-      setSelectedImage(response.data[0]);
-    }
+    await axios
+      .post(
+        `http://ec2-18-136-120-15.ap-southeast-1.compute.amazonaws.com:2030/process_image`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
+      .then((res) => {
+        if (res) {
+          setData(res.data);
+          setSelectedImage(res.data[0]);
+        }
+      })
+      .catch(message.error(`Upload Thất bại`));
   };
 
   const selectImageHandler = (dataImageSelected: IData) => {
@@ -132,7 +133,12 @@ function App() {
               </div>
             </div>
           </Col>
-          <Col span={12} className="app-container__right">
+          <Col
+            span={12}
+            className={clsx("app-container__right", {
+              // uploaded: !isSubmitted === false,
+            })}
+          >
             <div className="app-container__right--card">
               <div className="app-container__right--card-title">
                 <h2>
@@ -143,7 +149,7 @@ function App() {
                 </h2>
               </div>
 
-              <Row className="upload-content__results" gutter={[30, 30]}>
+              <Row className={"upload-content__results"} gutter={[30, 30]}>
                 {selectedImage ? (
                   <Col span={24}>
                     <h3 className="pt-3">{selectedImage.name}</h3>

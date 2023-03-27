@@ -22,36 +22,38 @@ $color-white: white;
     }
 
     .app-container__right {
-      &.uploaded {
+      position: initial;
+      transition: all 0.5s ease-in-out;
+
+      &:where(.css-dev-only-do-not-override-mxhywb).ant-col {
         position: initial;
-        transition: all 0.5s ease-in-out;
+      }
 
-        .upload-content__results {
-          display: flex;
-          opacity: 1;
-          transform: translateX(-1%);
-          height: 590px;
+      .upload-content__results {
+        display: flex;
+        opacity: 1;
+        transform: translateX(-1%);
+        height: 590px;
 
-          &--main-img {
-            background: $color-white;
-            width: 384px;
-          }
+        &--main-img {
+          background: $color-white;
+          width: 384px;
         }
+      }
 
-        .app-container__right--card {
-          padding: 139px 64px;
-          &-title h2 {
-            color: $color-white;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: all 0.5s ease-in-out;
-            white-space: nowrap;
-            margin-bottom: 100px;
+      .app-container__right--card {
+        padding: 139px 64px;
+        &-title h2 {
+          color: $color-white;
+          left: 50%;
+          transform: translateX(-50%);
+          transition: all 0.5s ease-in-out;
+          white-space: nowrap;
+          margin-bottom: 100px;
+          position: absolute;
+          span img {
             position: absolute;
-            span img {
-              position: absolute;
-              top: -20px;
-            }
+            top: -20px;
           }
         }
       }
@@ -119,6 +121,40 @@ $color-white: white;
 
       &:where(.css-dev-only-do-not-override-mxhywb).ant-col {
         position: relative;
+      }
+
+      &.uploaded {
+        position: initial;
+        transition: all 0.5s ease-in-out;
+
+        .upload-content__results {
+          display: flex;
+          opacity: 1;
+          transform: translateX(-1%);
+          height: 590px;
+
+          &--main-img {
+            background: $color-white;
+            width: 384px;
+          }
+        }
+
+        .app-container__right--card {
+          padding: 139px 64px;
+          &-title h2 {
+            color: $color-white;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.5s ease-in-out;
+            white-space: nowrap;
+            margin-bottom: 100px;
+            position: absolute;
+            span img {
+              position: absolute;
+              top: -20px;
+            }
+          }
+        }
       }
 
       .upload-content__results {
