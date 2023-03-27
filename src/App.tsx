@@ -99,7 +99,11 @@ function App() {
           setSelectedImage(res.data[0]);
         }
       })
-      .catch(message.error(`Upload Thất bại`));
+      .catch((error) => {
+        message.error(`Upload Thất bại`);
+      });
+
+    setLoading(false);
   };
 
   const selectImageHandler = (dataImageSelected: IData) => {
