@@ -5,9 +5,22 @@ $color-white: white;
   margin: 0;
   padding: 0;
   position: relative;
-  transition: all 2s ease-in-out;
+  transition: background 2s ease-in-out;
   &.uploaded {
-    background: linear-gradient(90deg, #d384fd -1.03%, #8567f7 48.97%);
+    min-height: 100vh;
+    height: 1000px;
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: linear-gradient(152.96deg, #d384fd -1.03%, #8567f7 81.68%);
+      opacity: 0;
+      transition: opacity 0.5s linear;
+    }
+    background: linear-gradient(152.96deg, #d384fd -1.03%, #8567f7 81.68%);
 
     .app-container__left--card {
       opacity: 0;
@@ -20,40 +33,45 @@ $color-white: white;
         transition: all 0.25s ease-in-out;
       }
     }
-
-    .app-container__right {
-      position: initial;
-      transition: all 0.5s ease-in-out;
-
-      &:where(.css-dev-only-do-not-override-mxhywb).ant-col {
+    .app-container {
+      &__left {
+        background: initial;
+      }
+      &__right {
         position: initial;
-      }
+        transition: all 0.5s ease-in-out;
 
-      .upload-content__results {
-        display: flex;
-        opacity: 1;
-        transform: translateX(-1%);
-        height: 590px;
-
-        &--main-img {
-          background: $color-white;
-          width: 384px;
+        &:where(.css-dev-only-do-not-override-mxhywb).ant-col {
+          position: initial;
         }
-      }
 
-      .app-container__right--card {
-        padding: 139px 64px;
-        &-title h2 {
-          color: $color-white;
-          left: 50%;
-          transform: translateX(-50%);
-          transition: all 0.5s ease-in-out;
-          white-space: nowrap;
-          margin-bottom: 100px;
-          position: absolute;
-          span img {
+        .upload-content__results {
+          padding: 12px 18px;
+          display: flex;
+          opacity: 1;
+          transform: translateX(-1%);
+          height: auto;
+
+          &--main-img {
+            background: $color-white;
+            width: 384px;
+          }
+        }
+
+        .app-container__right--card {
+          padding: 139px 64px;
+          &-title h2 {
+            color: $color-white;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.5s ease-in-out;
+            white-space: nowrap;
+            margin-bottom: 100px;
             position: absolute;
-            top: -20px;
+            span img {
+              position: absolute;
+              top: -20px;
+            }
           }
         }
       }
@@ -66,7 +84,8 @@ $color-white: white;
     right: 0;
     bottom: 0;
     left: 0;
-    background: linear-gradient(90deg, #d384fd -1.03%, #8567f7 48.97%);
+
+    // background: linear-gradient(152deg, #d384fd -1.03%, #8567f7 48.97%);
     opacity: 0;
     transition: opacity 0.5s linear;
   }
@@ -81,9 +100,11 @@ $color-white: white;
     height: inherit;
     // height: 100vh;
     &__left {
-      background: linear-gradient(90deg, #d384fd -1.03%, #8567f7 48.97%);
+      // background: linear-gradient(152.96deg, #d384fd -1.03%, #8567f7 81.68%);
 
-      position: relative;
+      background: linear-gradient(152deg, #d384fd -1.03%, #8567f7 48.97%);
+
+      // position: relative;
       height: inherit;
 
       &--card {
@@ -108,7 +129,7 @@ $color-white: white;
           color: $color-white;
           font-style: normal;
           font-weight: 400;
-          font-size: 18px;
+          font-size: 1.8rem;
           line-height: 150%;
           text-align: center;
           padding-bottom: 120px;
@@ -131,7 +152,7 @@ $color-white: white;
           display: flex;
           opacity: 1;
           transform: translateX(-1%);
-          height: 590px;
+          height: auto;
 
           &--main-img {
             background: $color-white;
@@ -162,6 +183,8 @@ $color-white: white;
         padding: 24px 36px;
         position: absolute;
         top: 23%;
+        right: 5%;
+
         width: 100%;
         max-width: 600px;
         opacity: 0;
@@ -202,9 +225,23 @@ $color-white: white;
     padding: 36px 24px;
     transition: all 0.5s ease-in-out;
 
+    .ant-upload-wrapper {
+      & .ant-upload.ant-upload-drag {
+        height: 250px;
+      }
+      &.current-image-uploaded > .ant-upload.ant-upload-drag {
+        height: auto;
+      }
+    }
+    .current-image-uploaded {
+    }
+
     &.show-image {
       top: 23%;
       transform: translate(-130%);
+    }
+    p {
+      display: none;
     }
   }
 
@@ -212,23 +249,23 @@ $color-white: white;
     display: flex;
     justify-content: flex-end;
     button {
-      margin-top: 24px;
+      margin-top: 2.4rem;
       margin-right: 1rem;
-      height: 44px;
+      height: 4.4rem;
+      font-weight: 600;
+      font-size: 1.6rem;
+      border-radius: 0.8rem;
+      width: 100%;
     }
 
     .btn-clear {
-      width: 100%;
-      max-width: 72px;
+      max-width: 7.2rem;
       background: black;
-      border-radius: 8px;
     }
 
     .btn-submit {
-      width: 100%;
-      max-width: 126px;
+      max-width: 12.6rem;
       background: #ba92d9;
-      border-radius: 8px;
       color: $color-white;
     }
   }
@@ -236,7 +273,7 @@ $color-white: white;
   h1 {
     font-style: normal;
     font-weight: 600;
-    font-size: 32px;
+    font-size: 3.2rem;
     line-height: 40px;
     text-align: center;
     color: #404040;
@@ -251,11 +288,17 @@ $color-white: white;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      img {
+        padding-bottom: 2.1rem;
+      }
+      // p {
+      //   display: none;
+      // }
     }
 
     p {
       font-weight: 400;
-      font-size: 16px;
+      font-size: 1.6rem;
       line-height: 20px;
 
       text-align: center;
@@ -267,14 +310,14 @@ $color-white: white;
   h3 {
     font-style: normal;
     font-weight: 600;
-    font-size: 16px;
+    font-size: 1.6rem;
     line-height: 150%;
     color: #404040;
   }
 
   h2 {
     font-weight: 600;
-    font-size: 29px;
+    font-size: 2.9rem;
     line-height: 35px;
     padding-bottom: 8px;
     text-align: center;
@@ -283,7 +326,7 @@ $color-white: white;
   h1 {
     font-style: normal;
     font-weight: 700;
-    font-size: 46px;
+    font-size: 4.6rem;
     line-height: 150%;
 
     text-align: center;
@@ -307,6 +350,10 @@ $color-white: white;
 
   .items-center {
     align-items: center;
+  }
+
+  .relative {
+    position: relative;
   }
 
   .cursor-pointer {
@@ -350,4 +397,189 @@ $color-white: white;
   width: 100%;
   background-position: center center;
   height: 350px;
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+  .example {
+    background: red;
+  }
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {
+  // .example {
+  //   background: green;
+  // }
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
+  // .example {
+  //   background: blue;
+  // }
+}
+
+@media only screen and (max-width: 1200px) and (-webkit-min-device-pixel-ratio: 2) {
+  /* your CSS styles here */
+  .App {
+    .upload-content__results {
+      top: 130% !important;
+    }
+  }
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+  // .example {
+  //   background: orange;
+  // }
+}
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (max-width: 1200px) {
+  // .example {
+  //   background: pink;
+  // }
+
+  html {
+    font-size: 50%;
+  }
+
+  body {
+    margin: 0;
+    overflow-y: scroll;
+  }
+
+  .App {
+    height: 100vh;
+    padding-left: 15px;
+    padding-right: 15px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    &.uploaded {
+      height: 100vh;
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: linear-gradient(152.96deg, #d384fd -1.03%, #8567f7 81.68%);
+        opacity: 0;
+        transition: opacity 0.5s linear;
+      }
+      .upload-content {
+        top: 30%;
+        transform: translateX(-50%);
+        p {
+          display: none;
+        }
+        > div {
+          height: 72%;
+        }
+      }
+      .app-container__right {
+        height: 240%;
+        background: none;
+        padding: 30px 30px !important;
+
+        &:where(.css-dev-only-do-not-override-mxhywb).ant-col {
+          position: initial;
+        }
+        .app-container__right--card-title h2 {
+          top: 15%;
+
+          span img {
+            right: 30px;
+            top: -25px;
+            right: 0;
+          }
+        }
+        .upload-content__results {
+          padding: 12px 18px;
+
+          display: flex;
+          padding-left: 0;
+          padding-right: 0;
+          width: 92%;
+          max-width: initial;
+          top: 100%;
+          left: 50%;
+          opacity: 1;
+          transition: all 0.25s ease-in-out;
+          transform: translateX(-50%);
+        }
+      }
+    }
+
+    .default-upload__wrapper {
+      padding: initial;
+      img {
+        width: 2.3rem;
+      }
+      h2 {
+        font-size: 2.4rem;
+      }
+    }
+    .app-container__left {
+      display: none;
+    }
+
+    .app-container__right {
+      background: linear-gradient(152.96deg, #d384fd -1.03%, #8567f7 81.68%);
+      // :where(.css-dev-only-do-not-override-mxhywb).ant-col {
+      height: 150%;
+      //   margin-bottom: 30px;
+      // }
+      &--card {
+        padding: 70px 32px;
+        &-title {
+          h2 {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            span img {
+              right: -1.5rem;
+            }
+          }
+        }
+      }
+      .upload-content__results {
+        padding: 12px 18px;
+
+        display: none;
+        opacity: 1;
+        top: 100%;
+        transform: translateX(-1%);
+      }
+    }
+    .upload-content {
+      // min-height: 44.6rem;
+
+      padding: 1.8rem 1.2rem;
+      width: 90%;
+      max-width: initial;
+      top: 27%;
+      left: 50%;
+      transform: translateX(-50%);
+      p {
+        display: block;
+        position: absolute;
+        bottom: -70px;
+        color: white;
+        text-align: center;
+      }
+
+      > div {
+        height: auto;
+        // height: calc(44.6rem * 70 / 100);
+      }
+    }
+  }
 }

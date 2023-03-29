@@ -3,13 +3,16 @@ import ReactDOM from "react-dom/client";
 import "./index.scss";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import { DeviceDetectProvider } from "./assets/lib/context/DeviceDetectContext";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <DeviceDetectProvider>
+      <App />
+    </DeviceDetectProvider>
   </React.StrictMode>
 );
 

@@ -1,3 +1,13 @@
+@font-face {
+  font-family: "Averta";
+  src: url("./assets/fonts/Intelligent\ Design\ -\ AvertaStdCY-Light_1.otf")
+    format("truetype");
+  font-weight: 400;
+  // font-weight: 300;
+  // font-style: normal;
+  // font-display: auto;
+}
+
 html,
 body,
 div,
@@ -133,10 +143,19 @@ button {
 //   height: inherit;
 // }
 
+* {
+  box-sizing: border-box;
+  font-family: "Averta", sans-serif !important;
+}
+
+html {
+  font-size: 62.5%;
+}
+
 body {
   max-width: 1920px;
   width: 100%;
   margin: 0 auto;
   height: 100vh;
-  overflow: hidden;
+  // overflow: hidden;
 }

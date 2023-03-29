@@ -1,6 +1,6 @@
 import { Col, message, Row, Spin, Upload, UploadProps } from "antd";
 import { RcFile, UploadFile } from "antd/es/upload";
-import { SyntheticEvent, useState } from "react";
+import { SyntheticEvent, useState, useEffect, useRef, useContext } from "react";
 import "./app.scss";
 import noneImage from "./assets/img/none-image.png";
 import logo from "./assets/img/logo.png";
@@ -11,6 +11,8 @@ import clsx from "clsx";
 
 import { ReloadIcon } from "./assets/svg/icon-svg";
 import Stars from "./assets/components/star/Star";
+import { DeviceDetectContext } from "./assets/lib/context/DeviceDetectContext";
+import { toLowerCaseNonAccentVietnamese } from "./assets/contants/common";
 
 const { Dragger } = Upload;
 
@@ -23,6 +25,11 @@ export interface IData {
 }
 
 function App() {
+  const context = useContext(DeviceDetectContext);
+  // console.log("context", );
+
+  const bottomRef = useRef<HTMLDivElement>(null);
+
   const [originFile, setOriginFile] = useState<UploadFile<any>>();
   const [currentImage, setCurrentImage] = useState<string>();
   const [isSubmitted, setIsSubmited] = useState(false);
@@ -49,6 +56,16 @@ function App() {
       }
     },
   };
+
+  useEffect(() => {
+    if (data.length > 0 && bottomRef.current) {
+      bottomRef.current?.scrollIntoView({
+        behavior: "smooth",
+        inline: "end",
+        block: "end",
+      });
+    }
+  }, [data]);
 
   const getBase64 = (file: RcFile): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -95,6 +112,7 @@ function App() {
       )
       .then((res) => {
         if (res) {
+          console.log("response", res);
           setData(res.data);
           setSelectedImage(res.data[0]);
         }
@@ -117,7 +135,15 @@ function App() {
     >
       <form onSubmit={submitHandler}>
         <Row className="app-container" gutter={[30, 30]}>
-          <Col span={12} className="app-container__left">
+          <Col
+            xxl={12}
+            xl={12}
+            lg={24}
+            md={24}
+            sm={24}
+            xs={24}
+            className="app-container__left"
+          >
             <div className="app-container__left--card">
               <div>
                 <div className="app-container__left--card__logo">
@@ -138,49 +164,71 @@ function App() {
             </div>
           </Col>
           <Col
-            span={12}
-            className={clsx("app-container__right", {
-              // uploaded: !isSubmitted === false,
-            })}
+            xxl={12}
+            xl={12}
+            lg={24}
+            md={24}
+            sm={24}
+            xs={24}
+            className={clsx("app-container__right", {})}
           >
             <div className="app-container__right--card">
               <div className="app-container__right--card-title">
                 <h2>
-                  Reviewty AI - Search - By - Image{" "}
+                  Reviewty AI{" "}
+                  <span className="relative">Search - By - Image</span>
                   <span>
                     <img src={beta} alt="beta" />
                   </span>
                 </h2>
               </div>
 
-              <Row className={"upload-content__results"} gutter={[30, 30]}>
+              <Row
+                className={"upload-content__results"}
+                ref={bottomRef}
+                style={{
+                  padding: "36px",
+                }}
+              >
                 {selectedImage ? (
-                  <Col span={24}>
-                    <h3 className="pt-3">{selectedImage.name}</h3>
-                    <div className="pt-3">
-                      <Stars
-                        ratingNumber={Number(selectedImage.review_avg_rate)}
-                      />
-                      <span>
-                        ({selectedImage.review_avg_rate.slice(0, 3)}) (
-                        {selectedImage.review_count})
-                      </span>
-                      <span></span>
-                    </div>
-                    <a
-                      href={`https://community.review-ty.com/search/products/${selectedImage.product_id}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Link sản phẩm để đây
-                    </a>
-                    <div className="flex justify-center">
-                      <div
-                        className="background-image"
-                        style={{
-                          backgroundImage: `url(${selectedImage.url})`,
-                        }}
-                      ></div>
+                  <Col span={24} style={{ background: "transparent" }}>
+                    <div style={{ paddingBottom: "30px" }}>
+                      <h3 className="pt-3">{selectedImage.name}</h3>
+                      <div className="pt-3">
+                        <Stars
+                          ratingNumber={Number(selectedImage.review_avg_rate)}
+                        />
+                        <span>
+                          {selectedImage.review_avg_rate.slice(0, 3)} (
+                          {selectedImage.review_count})
+                        </span>
+                        <span></span>
+                      </div>
+                      <a
+                        href={
+                          context.mobile
+                            ? `https://review-ty.com/products/${selectedImage.product_id}`
+                            : `https://community.review-ty.com/search/products/${
+                                selectedImage.product_id
+                              }/${toLowerCaseNonAccentVietnamese(
+                                selectedImage.name
+                              )
+                                .split(" ")
+                                .join("-")}`
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Link sản phẩm để đây
+                      </a>
+                      <div className="flex justify-center">
+                        <div
+                          className="background-image"
+                          style={{
+                            backgroundImage: `url(${selectedImage.url})`,
+                          }}
+                        ></div>
+                      </div>
                     </div>
                   </Col>
                 ) : (
@@ -191,6 +239,7 @@ function App() {
 
                 {data?.map((root) => (
                   <Col
+                    style={{}}
                     className="cursor-pointer"
                     span={4}
                     key={Number(root?.product_id)}
@@ -209,59 +258,84 @@ function App() {
                   </Col>
                 ))}
               </Row>
-              <div className={`upload-content ${isSubmitted && "show-image"}`}>
-                <h3>Upload your file</h3>
+              <div>
+                <div style={{ padding: "10px" }}>
+                  <div
+                    className={`upload-content ${isSubmitted && "show-image"}`}
+                  >
+                    <div style={{ padding: "10px" }} className="relative">
+                      <h3 style={{ paddingBottom: "24px" }}>
+                        Upload your file
+                      </h3>
 
-                <Dragger
-                  customRequest={dummyRequest}
-                  {...props}
-                  beforeUpload={(file) => {
-                    const isJPG =
-                      file.type === "image/jpeg" || file.type === "image/png";
-                    if (!isJPG) {
-                      message.error("You can only upload JPG or PNG file!");
-                      return false;
-                    } else {
-                      return true;
-                    }
-                  }}
-                >
-                  {currentImage ? (
-                    <div className="upload-content__show-image">
-                      <div
-                        className="background-image"
-                        style={{
-                          backgroundImage: `url(${currentImage})`,
+                      <Dragger
+                        className={clsx({
+                          "current-image-uploaded": currentImage,
+                        })}
+                        customRequest={dummyRequest}
+                        {...props}
+                        beforeUpload={(file) => {
+                          const isJPG =
+                            file.type === "image/jpeg" ||
+                            file.type === "image/png";
+                          if (!isJPG) {
+                            message.error(
+                              "You can only upload JPG or PNG file!"
+                            );
+                            return false;
+                          } else {
+                            return true;
+                          }
                         }}
-                      ></div>
-                    </div>
-                  ) : (
-                    <div className="default-upload">
-                      <div className="default-upload__wrapper">
-                        <img src={noneImage} alt="noneImage" />
-                        <h2>Click to upload</h2>
-                        <p>or drag and drop it here</p>
+                      >
+                        {currentImage ? (
+                          <div className="upload-content__show-image">
+                            <div
+                              className="background-image"
+                              style={{
+                                backgroundImage: `url(${currentImage})`,
+                              }}
+                            ></div>
+                          </div>
+                        ) : (
+                          <div className="default-upload">
+                            <div className="default-upload__wrapper">
+                              <img src={noneImage} alt="noneImage" />
+                              <h2>Click to upload</h2>
+                              <span>or drag and drop it here</span>
+                            </div>
+                          </div>
+                        )}
+                      </Dragger>
+
+                      <div className="btn-group flex">
+                        <button
+                          disabled={loading}
+                          className={clsx("btn-clear", {
+                            "btn-disabled": loading,
+                          })}
+                          type="button"
+                          onClick={reloadHandler}
+                        >
+                          <ReloadIcon />
+                        </button>
+                        <button
+                          className={clsx("btn-submit", {
+                            "btn-disabled": loading,
+                          })}
+                          type="submit"
+                          disabled={loading}
+                        >
+                          Submit
+                        </button>
                       </div>
                     </div>
-                  )}
-                </Dragger>
 
-                <div className="btn-group flex">
-                  <button
-                    disabled={loading}
-                    className={clsx("btn-clear", { "btn-disabled": loading })}
-                    type="button"
-                    onClick={reloadHandler}
-                  >
-                    <ReloadIcon />
-                  </button>
-                  <button
-                    className={clsx("btn-submit", { "btn-disabled": loading })}
-                    type="submit"
-                    disabled={loading}
-                  >
-                    Submit
-                  </button>
+                    <p>
+                      Simply drag & drop a file in your device on the right and
+                      we will convert your image to product image what you find
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
