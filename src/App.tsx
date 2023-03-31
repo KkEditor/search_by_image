@@ -81,6 +81,10 @@ function App() {
   };
 
   useEffect(() => {
+    if (!localStorage.getItem("uuidv4")) {
+      localStorage.setItem("uuidv4", uuid());
+    }
+
     axios.post("https://api-test.review-ty.com/graphql", {
       operationName: "imageSearchLog",
       variables: {
@@ -96,10 +100,6 @@ function App() {
       query:
         "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
     });
-
-    if (!localStorage.getItem("uuidv4")) {
-      localStorage.setItem("uuidv4", uuid());
-    }
 
     const newSocket = io("https://ai.review-ty.com/", {
       extraHeaders: {
@@ -128,14 +128,20 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (data.length > 0 && bottomRef.current) {
-      bottomRef.current?.scrollIntoView({
-        behavior: "smooth",
-        inline: "end",
-        block: "end",
-      });
+    if (isSubmitted || data.length > 0) {
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({
+          behavior: "smooth",
+          inline: "end",
+          block: "end",
+        });
+      }, 0);
+    } else {
+      window.scrollTo(0, 0);
     }
-  }, [data]);
+
+    return () => {};
+  }, [isSubmitted, data]);
 
   const getBase64 = (file: RcFile): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -167,6 +173,12 @@ function App() {
       message.error(`You must upload 1 file (png,jpg)`);
       return;
     }
+
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+      inline: "end",
+      block: "end",
+    });
     setIsSubmited(true);
     setLoading(true);
 
@@ -259,25 +271,8 @@ function App() {
                 {selectedImage ? (
                   <Col span={24} style={{ background: "transparent" }}>
                     <div style={{ paddingBottom: "30px" }}>
-                      <h3 className="pt-3">
-                        <a
-                          href={
-                            context.mobile
-                              ? `https://review-ty.com/products/${selectedImage.product_id}`
-                              : `https://community.review-ty.com/search/products/${
-                                  selectedImage.product_id
-                                }/${toLowerCaseNonAccentVietnamese(
-                                  selectedImage.name
-                                )
-                                  .split(" ")
-                                  .join("-")}`
-                          }
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {selectedImage.name}
-                        </a>
-                      </h3>
+                      <h3 className="pt-3">{selectedImage.name}</h3>
+
                       <div className="pt-3">
                         <Stars
                           ratingNumber={Number(selectedImage.review_avg_rate)}
@@ -288,6 +283,24 @@ function App() {
                         </span>
                         <span></span>
                       </div>
+
+                      <a
+                        href={
+                          context.mobile
+                            ? `https://review-ty.com/products/${selectedImage.product_id}`
+                            : `https://community.review-ty.com/search/products/${
+                                selectedImage.product_id
+                              }/${toLowerCaseNonAccentVietnamese(
+                                selectedImage.name
+                              )
+                                .split(" ")
+                                .join("-")}`
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Xem chi tiết
+                      </a>
 
                       <div className="flex justify-center">
                         <div
