@@ -108,21 +108,24 @@ function App() {
     });
     setSocket(newSocket);
     return () => {
-      axios.post("https://api-test.review-ty.com/graphql", {
-        operationName: "imageSearchLog",
-        variables: {
-          data: {
-            name: "test_search",
-            message: JSON.stringify({
-              date: new Date(),
-              "device-token": localStorage.getItem("uuidv4"),
-              status: "destroy",
-            }),
+      window.removeEventListener("beforeunload", () => {
+        axios.post("https://api-test.review-ty.com/graphql", {
+          operationName: "imageSearchLog",
+          variables: {
+            data: {
+              name: "test_search",
+              message: JSON.stringify({
+                date: new Date(),
+                "device-token": localStorage.getItem("uuidv4"),
+                status: "destroy",
+              }),
+            },
           },
-        },
-        query:
-          "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
+          query:
+            "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
+        });
       });
+
       newSocket.close();
     };
   }, []);
