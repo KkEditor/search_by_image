@@ -101,14 +101,11 @@ function App() {
       localStorage.setItem("uuidv4", uuid());
     }
 
-    const newSocket = io(
-      "http://ec2-18-136-120-15.ap-southeast-1.compute.amazonaws.com:2030/",
-      {
-        extraHeaders: {
-          "device-token": `${localStorage.getItem("uuidv4")}`,
-        },
-      }
-    );
+    const newSocket = io("https://ai.review-ty.com/", {
+      extraHeaders: {
+        "device-token": `${localStorage.getItem("uuidv4")}`,
+      },
+    });
     setSocket(newSocket);
     return () => {
       axios.post("https://api-test.review-ty.com/graphql", {
