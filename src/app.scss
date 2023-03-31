@@ -2,6 +2,9 @@ $color-white: white;
 
 .App {
   height: 100vh;
+
+  overflow: scroll;
+  min-height: 1000px;
   margin: 0;
   padding: 0;
   position: relative;
@@ -105,7 +108,8 @@ $color-white: white;
       background: linear-gradient(152deg, #d384fd -1.03%, #8567f7 48.97%);
 
       // position: relative;
-      height: inherit;
+      height: 1000px;
+      // height: inherit;
 
       &--card {
         display: flex;
@@ -420,11 +424,17 @@ $color-white: white;
   // }
 }
 
-@media only screen and (max-width: 1200px) and (-webkit-min-device-pixel-ratio: 2) {
+@media only screen and (max-width: 1200px) and (max-height: 569px) and (-webkit-min-device-pixel-ratio: 2) {
   /* your CSS styles here */
   .App {
-    .upload-content__results {
-      top: 130% !important;
+    &.uploaded {
+      .app-container__right .upload-content__results {
+        top: 130% !important;
+      }
+    }
+
+    .app-container__right .upload-content__results {
+      top: 130%;
     }
   }
 }
@@ -472,7 +482,7 @@ $color-white: white;
         transition: opacity 0.5s linear;
       }
       .upload-content {
-        top: 30%;
+        top: 27%;
         transform: translateX(-50%);
         p {
           display: none;
@@ -482,7 +492,7 @@ $color-white: white;
         }
       }
       .app-container__right {
-        height: 240%;
+        height: 200%;
         background: none;
         padding: 30px 30px !important;
 
@@ -494,8 +504,8 @@ $color-white: white;
 
           span img {
             right: 30px;
-            top: -25px;
-            right: 0;
+            top: 5px;
+            right: 2.5rem;
           }
         }
         .upload-content__results {
@@ -531,13 +541,15 @@ $color-white: white;
     .app-container__right {
       background: linear-gradient(152.96deg, #d384fd -1.03%, #8567f7 81.68%);
       // :where(.css-dev-only-do-not-override-mxhywb).ant-col {
-      height: 150%;
+      // height: 100%;
+      min-height: 1000px;
       //   margin-bottom: 30px;
       // }
       &--card {
         padding: 70px 32px;
         &-title {
           h2 {
+            color: white;
             position: relative;
             display: flex;
             flex-direction: column;
@@ -545,6 +557,7 @@ $color-white: white;
             justify-content: center;
             align-items: center;
             span img {
+              top: 5px;
               right: -1.5rem;
             }
           }
@@ -565,7 +578,7 @@ $color-white: white;
       padding: 1.8rem 1.2rem;
       width: 90%;
       max-width: initial;
-      top: 27%;
+      top: 20%;
       left: 50%;
       transform: translateX(-50%);
       p {
@@ -580,6 +593,45 @@ $color-white: white;
         height: auto;
         // height: calc(44.6rem * 70 / 100);
       }
+    }
+  }
+}
+
+@media only screen and (max-width: 1200px) and (max-height: 667px) and (max-height: 769px) and (-webkit-min-device-pixel-ratio: 2) {
+  /* your CSS styles here */
+  .App {
+    &.uploaded {
+      .app-container__right {
+        & div.upload-content__results {
+          top: 120%;
+        }
+      }
+    }
+
+    .app-container__right .upload-content__results {
+      top: 130%;
+    }
+  }
+  // .App {
+  //   .upload-content__results {
+  //     top: 110%;
+  //   }
+  // }
+}
+
+@media only screen and (max-width: 1200px) and (max-height: 769px) and (-webkit-min-device-pixel-ratio: 2) {
+  /* your CSS styles here */
+  .App {
+    &.uploaded {
+      .app-container__right {
+        & .upload-content__results {
+          top: 110%;
+        }
+      }
+    }
+
+    .app-container__right .upload-content__results {
+      top: 130%;
     }
   }
 }

@@ -8,12 +8,12 @@ import bg from "./assets/img/bg.png";
 import beta from "./assets/img/beta.png";
 import axios from "axios";
 import clsx from "clsx";
+import { io, Socket } from "socket.io-client";
 
 import { ReloadIcon } from "./assets/svg/icon-svg";
 import Stars from "./assets/components/star/Star";
 import { DeviceDetectContext } from "./assets/lib/context/DeviceDetectContext";
 import { toLowerCaseNonAccentVietnamese } from "./assets/contants/common";
-
 const { Dragger } = Upload;
 
 export interface IData {
@@ -35,6 +35,7 @@ function App() {
   const [isSubmitted, setIsSubmited] = useState(false);
   const [data, setData] = useState<IData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [socket, setSocket] = useState<Socket>();
 
   const [selectedImage, setSelectedImage] = useState<IData>();
 
@@ -56,6 +57,48 @@ function App() {
       }
     },
   };
+
+  useEffect(() => {
+    const newSocket = io(
+      "http://ec2-18-136-120-15.ap-southeast-1.compute.amazonaws.com:2030/"
+    );
+    setSocket(newSocket);
+    return () => {
+      newSocket.close();
+    };
+  }, []);
+
+  // useEffect(() => {
+  //   function onConnect(s: any) {
+  //     console.log(s);
+  //     socket.emit("someevent", { attr: "value" });
+
+  //     setIsConnected(true);
+  //   }
+
+  //   function onDisconnect() {
+  //     setIsConnected(false);
+  //   }
+
+  //   function onFooEvent(value: any) {
+  //     // setFooEvents((previous) => [...previous, value]);
+  //   }
+
+  //   // io.on("connection", function (socket) {
+  //   //   console.log("a user connected");
+  //   //   socket.emit("someevent", { attr: "value" });
+  //   // });
+
+  //   socket.on("/queue_position", onConnect);
+  //   // socket.on("disconnect", onDisconnect);
+  //   // socket.on("foo", onFooEvent);
+
+  //   return () => {
+  //     socket.off("queue_position", () => onConnect);
+  //     socket.off("disconnect", onDisconnect);
+  //     socket.off("foo", onFooEvent);
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (data.length > 0 && bottomRef.current) {
@@ -98,30 +141,21 @@ function App() {
     setIsSubmited(true);
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append("image", originFile?.originFileObj as File);
-    await axios
-      .post(
-        `http://ec2-18-136-120-15.ap-southeast-1.compute.amazonaws.com:2030/process_image`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      )
-      .then((res) => {
-        if (res) {
-          console.log("response", res);
-          setData(res.data);
-          setSelectedImage(res.data[0]);
-        }
-      })
-      .catch((error) => {
-        message.error(`Upload Thất bại`);
-      });
+    socket?.emit("process_image", originFile?.originFileObj);
 
-    setLoading(false);
+    socket?.on("process_image", (data) => {
+      const responseData = JSON.parse(data);
+
+      if (responseData) {
+        setData(responseData);
+        setSelectedImage(responseData[0]);
+        setLoading(false);
+      }
+    });
+
+    socket?.on("in_progress", (data) => {
+      console.log("inprogress", data);
+    });
   };
 
   const selectImageHandler = (dataImageSelected: IData) => {
@@ -198,7 +232,7 @@ function App() {
                         <Stars
                           ratingNumber={Number(selectedImage.review_avg_rate)}
                         />
-                        <span>
+                        <span style={{ marginLeft: "8px" }}>
                           {selectedImage.review_avg_rate.slice(0, 3)} (
                           {selectedImage.review_count})
                         </span>
@@ -347,3 +381,41 @@ function App() {
 }
 
 export default App;
+
+// import { useState, useEffect } from "react";
+// import io, { Socket } from "socket.io-client";
+
+// function App() {
+//   const [socket, setSocket] = useState<Socket>();
+
+//   useEffect(() => {
+//     const newSocket = io(
+//       "http://ec2-18-136-120-15.ap-southeast-1.compute.amazonaws.com:2030/"
+//     );
+//     setSocket(newSocket);
+
+//     newSocket.on("process_image", () => {
+//       newSocket.emit("process_image", "initial");
+//     });
+
+//     return () => {
+//       newSocket.close();
+//     };
+//   }, []);
+
+//   return (
+//     <div>
+//       {socket && (
+//         <button
+//           onClick={() =>
+//             socket.emit("process_image", "Hello, Socket.IO server!")
+//           }
+//         >
+//           Send message to server
+//         </button>
+//       )}
+//     </div>
+//   );
+// }
+
+// export default App;
