@@ -1,4 +1,4 @@
-import { Col, message, Row, Spin, Upload, UploadProps } from "antd";
+import { Col, message, Progress, Row, Spin, Upload, UploadProps } from "antd";
 import { RcFile, UploadFile } from "antd/es/upload";
 import { SyntheticEvent, useState, useEffect, useRef, useContext } from "react";
 import "./app.scss";
@@ -7,6 +7,11 @@ import logo from "./assets/img/logo.png";
 import bg from "./assets/img/bg.png";
 import beta from "./assets/img/beta.png";
 import axios from "axios";
+import { v4 as uuid } from "uuid";
+import Resizer from "react-image-file-resizer";
+
+// import { uuid } from "uuid";
+
 import clsx from "clsx";
 import { io, Socket } from "socket.io-client";
 
@@ -14,6 +19,7 @@ import { ReloadIcon } from "./assets/svg/icon-svg";
 import Stars from "./assets/components/star/Star";
 import { DeviceDetectContext } from "./assets/lib/context/DeviceDetectContext";
 import { toLowerCaseNonAccentVietnamese } from "./assets/contants/common";
+// import { atob } from "buffer";
 const { Dragger } = Upload;
 
 export interface IData {
@@ -26,11 +32,12 @@ export interface IData {
 
 function App() {
   const context = useContext(DeviceDetectContext);
-  // console.log("context", );
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const [originFile, setOriginFile] = useState<UploadFile<any>>();
+  const [percent, setPercent] = useState<[string, number]>(["", 0]);
+
+  const [originFile, setOriginFile] = useState();
   const [currentImage, setCurrentImage] = useState<string>();
   const [isSubmitted, setIsSubmited] = useState(false);
   const [data, setData] = useState<IData[]>([]);
@@ -47,10 +54,25 @@ function App() {
       if (status !== "uploading") {
       }
       if (status === "done") {
-        const base64 = await getBase64(info.file.originFileObj as RcFile);
+        const resizeFile: any = await new Promise((resolve) => {
+          Resizer.imageFileResizer(
+            info.file.originFileObj as File,
+            300,
+            300,
+            "JPEG",
+            100,
+            0,
+            (uri) => {
+              resolve(uri);
+            },
+            "blob"
+          );
+        });
+
+        const base64 = await getBase64(resizeFile as RcFile);
 
         setCurrentImage(base64);
-        setOriginFile(info.file);
+        setOriginFile(resizeFile);
         message.success(`${info.file.name} file uploaded successfully.`);
       } else if (status === "error") {
         message.error(`${info.file.name} file upload failed.`);
@@ -59,46 +81,54 @@ function App() {
   };
 
   useEffect(() => {
+    axios.post("https://api-test.review-ty.com/graphql", {
+      operationName: "imageSearchLog",
+      variables: {
+        data: {
+          name: "test_search",
+          message: JSON.stringify({
+            date: new Date(),
+            "device-token": localStorage.getItem("uuidv4"),
+            status: "init",
+          }),
+        },
+      },
+      query:
+        "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
+    });
+
+    if (!localStorage.getItem("uuidv4")) {
+      localStorage.setItem("uuidv4", uuid());
+    }
+
     const newSocket = io(
-      "http://ec2-18-136-120-15.ap-southeast-1.compute.amazonaws.com:2030/"
+      "http://ec2-18-136-120-15.ap-southeast-1.compute.amazonaws.com:2030/",
+      {
+        extraHeaders: {
+          "device-token": `${localStorage.getItem("uuidv4")}`,
+        },
+      }
     );
     setSocket(newSocket);
     return () => {
+      axios.post("https://api-test.review-ty.com/graphql", {
+        operationName: "imageSearchLog",
+        variables: {
+          data: {
+            name: "test_search",
+            message: JSON.stringify({
+              date: new Date(),
+              "device-token": localStorage.getItem("uuidv4"),
+              status: "destroy",
+            }),
+          },
+        },
+        query:
+          "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
+      });
       newSocket.close();
     };
   }, []);
-
-  // useEffect(() => {
-  //   function onConnect(s: any) {
-  //     console.log(s);
-  //     socket.emit("someevent", { attr: "value" });
-
-  //     setIsConnected(true);
-  //   }
-
-  //   function onDisconnect() {
-  //     setIsConnected(false);
-  //   }
-
-  //   function onFooEvent(value: any) {
-  //     // setFooEvents((previous) => [...previous, value]);
-  //   }
-
-  //   // io.on("connection", function (socket) {
-  //   //   console.log("a user connected");
-  //   //   socket.emit("someevent", { attr: "value" });
-  //   // });
-
-  //   socket.on("/queue_position", onConnect);
-  //   // socket.on("disconnect", onDisconnect);
-  //   // socket.on("foo", onFooEvent);
-
-  //   return () => {
-  //     socket.off("queue_position", () => onConnect);
-  //     socket.off("disconnect", onDisconnect);
-  //     socket.off("foo", onFooEvent);
-  //   };
-  // }, []);
 
   useEffect(() => {
     if (data.length > 0 && bottomRef.current) {
@@ -134,6 +164,8 @@ function App() {
   const submitHandler = async (e: SyntheticEvent) => {
     e.preventDefault();
 
+    setPercent(["", 0]);
+
     if (!currentImage) {
       message.error(`You must upload 1 file (png,jpg)`);
       return;
@@ -141,7 +173,7 @@ function App() {
     setIsSubmited(true);
     setLoading(true);
 
-    socket?.emit("process_image", originFile?.originFileObj);
+    socket?.emit("process_image", originFile);
 
     socket?.on("process_image", (data) => {
       const responseData = JSON.parse(data);
@@ -154,7 +186,9 @@ function App() {
     });
 
     socket?.on("in_progress", (data) => {
-      console.log("inprogress", data);
+      const splitPercetAndName = data.split(":");
+
+      setPercent(splitPercetAndName);
     });
   };
 
@@ -167,6 +201,7 @@ function App() {
         uploaded: !isSubmitted === false,
       })}
     >
+      {}
       <form onSubmit={submitHandler}>
         <Row className="app-container" gutter={[30, 30]}>
           <Col
@@ -227,7 +262,25 @@ function App() {
                 {selectedImage ? (
                   <Col span={24} style={{ background: "transparent" }}>
                     <div style={{ paddingBottom: "30px" }}>
-                      <h3 className="pt-3">{selectedImage.name}</h3>
+                      <h3 className="pt-3">
+                        <a
+                          href={
+                            context.mobile
+                              ? `https://review-ty.com/products/${selectedImage.product_id}`
+                              : `https://community.review-ty.com/search/products/${
+                                  selectedImage.product_id
+                                }/${toLowerCaseNonAccentVietnamese(
+                                  selectedImage.name
+                                )
+                                  .split(" ")
+                                  .join("-")}`
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {selectedImage.name}
+                        </a>
+                      </h3>
                       <div className="pt-3">
                         <Stars
                           ratingNumber={Number(selectedImage.review_avg_rate)}
@@ -238,23 +291,7 @@ function App() {
                         </span>
                         <span></span>
                       </div>
-                      <a
-                        href={
-                          context.mobile
-                            ? `https://review-ty.com/products/${selectedImage.product_id}`
-                            : `https://community.review-ty.com/search/products/${
-                                selectedImage.product_id
-                              }/${toLowerCaseNonAccentVietnamese(
-                                selectedImage.name
-                              )
-                                .split(" ")
-                                .join("-")}`
-                        }
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Link sản phẩm để đây
-                      </a>
+
                       <div className="flex justify-center">
                         <div
                           className="background-image"
@@ -266,14 +303,17 @@ function App() {
                     </div>
                   </Col>
                 ) : (
-                  <Col span={24} className="flex justify-center items-center">
-                    <Spin spinning={loading}></Spin>
+                  <Col
+                    span={24}
+                    className="flex justify-center items-center flex-column"
+                  >
+                    <label>{percent[0]}</label>
+                    <Progress percent={percent[1]} />
                   </Col>
                 )}
 
                 {data?.map((root) => (
                   <Col
-                    style={{}}
                     className="cursor-pointer"
                     span={4}
                     key={Number(root?.product_id)}
@@ -358,7 +398,7 @@ function App() {
                             "btn-disabled": loading,
                           })}
                           type="submit"
-                          disabled={loading}
+                          disabled={loading || isSubmitted}
                         >
                           Submit
                         </button>
@@ -381,41 +421,3 @@ function App() {
 }
 
 export default App;
-
-// import { useState, useEffect } from "react";
-// import io, { Socket } from "socket.io-client";
-
-// function App() {
-//   const [socket, setSocket] = useState<Socket>();
-
-//   useEffect(() => {
-//     const newSocket = io(
-//       "http://ec2-18-136-120-15.ap-southeast-1.compute.amazonaws.com:2030/"
-//     );
-//     setSocket(newSocket);
-
-//     newSocket.on("process_image", () => {
-//       newSocket.emit("process_image", "initial");
-//     });
-
-//     return () => {
-//       newSocket.close();
-//     };
-//   }, []);
-
-//   return (
-//     <div>
-//       {socket && (
-//         <button
-//           onClick={() =>
-//             socket.emit("process_image", "Hello, Socket.IO server!")
-//           }
-//         >
-//           Send message to server
-//         </button>
-//       )}
-//     </div>
-//   );
-// }
-
-// export default App;
