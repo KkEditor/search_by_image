@@ -41,27 +41,13 @@ function App() {
   const context = useContext(DeviceDetectContext);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [percent, setPercent] = useState<[string, number]>(["", 0]);
-  const [originFile, setOriginFile] = useState();
+  const [originFile, setOriginFile] = useState<RcFile>();
   const [currentImage, setCurrentImage] = useState<string>();
   const [isSubmitted, setIsSubmited] = useState(false);
   const [data, setData] = useState<IData[]>([]);
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState<Socket>();
   const [selectedImage, setSelectedImage] = useState<IData>();
-
-  // const alertUser = (e: any) => {
-  //   alert(1);
-  //   handleEndConcert();
-  //   e.preventDefault();
-  //   e.returnValue = "Are you sure you want to close this tab?";
-  // };
-
-  // useEffect(() => {
-  //   window.addEventListener("beforeunload", alertUser);
-  //   return () => {
-  //     window.removeEventListener("beforeunload", alertUser);
-  //   };
-  // }, []);
 
   const props: UploadProps = {
     maxCount: 1,
@@ -71,25 +57,10 @@ function App() {
       if (status !== "uploading") {
       }
       if (status === "done") {
-        const resizeFile: any = await new Promise((resolve) => {
-          Resizer.imageFileResizer(
-            info.file.originFileObj as File,
-            300,
-            300,
-            "JPEG",
-            100,
-            0,
-            (uri) => {
-              resolve(uri);
-            },
-            "blob"
-          );
-        });
-
-        const base64 = await getBase64(resizeFile as RcFile);
+        const base64 = await getBase64(info.file.originFileObj as RcFile);
 
         setCurrentImage(base64);
-        setOriginFile(resizeFile);
+        setOriginFile(info.file.originFileObj);
         message.success(`${info.file.name} file uploaded successfully.`);
       } else if (status === "error") {
         message.error(`${info.file.name} file upload failed.`);
@@ -98,6 +69,8 @@ function App() {
   };
 
   useEffect(() => {
+    window.addEventListener("beforeunload", handleEndConcert);
+
     if (!localStorage.getItem("uuidv4")) {
       localStorage.setItem("uuidv4", uuid());
     }
@@ -126,30 +99,14 @@ function App() {
 
     setSocket(newSocket);
     return () => {
-      window.removeEventListener("beforeunload", async (e) => {
-        await axios.post("https://api.review-ty.com/graphql", {
-          operationName: "imageSearchLog",
-          variables: {
-            data: {
-              name: "test_search",
-              message: JSON.stringify({
-                date: new Date(),
-                "device-token": localStorage.getItem("uuidv4"),
-                status: "destroy",
-              }),
-            },
-          },
-          query:
-            "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
-        });
-      });
-
+      window.removeEventListener("beforeunload", handleEndConcert);
       newSocket.close();
     };
   }, []);
 
-  const handleEndConcert = async () => {
-    await axios.post("https://api-test.review-ty.com/graphql", {
+  const handleEndConcert = async (e: Event) => {
+    e.preventDefault();
+    await axios.post("https://api.review-ty.com/graphql", {
       operationName: "imageSearchLog",
       variables: {
         data: {

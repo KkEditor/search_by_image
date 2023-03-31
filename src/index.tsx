@@ -1,10 +1,10 @@
-import React from "react";
+import React, { Fragment } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.scss";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { DeviceDetectProvider } from "./assets/lib/context/DeviceDetectContext";
-
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
@@ -12,7 +12,11 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <DeviceDetectProvider>
-      <App />
+      <Router>
+        <Routes>
+          <Route path="/*" element={<App />} />
+        </Routes>
+      </Router>
     </DeviceDetectProvider>
   </React.StrictMode>
 );
