@@ -9,7 +9,13 @@ import beta from "./assets/img/beta.png";
 import axios from "axios";
 import { v4 as uuid } from "uuid";
 import Resizer from "react-image-file-resizer";
-
+import { useNavigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 // import { uuid } from "uuid";
 
 import clsx from "clsx";
@@ -31,20 +37,31 @@ export interface IData {
 }
 
 function App() {
+  // const navigate = useNavigate();
   const context = useContext(DeviceDetectContext);
-
   const bottomRef = useRef<HTMLDivElement>(null);
-
   const [percent, setPercent] = useState<[string, number]>(["", 0]);
-
   const [originFile, setOriginFile] = useState();
   const [currentImage, setCurrentImage] = useState<string>();
   const [isSubmitted, setIsSubmited] = useState(false);
   const [data, setData] = useState<IData[]>([]);
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState<Socket>();
-
   const [selectedImage, setSelectedImage] = useState<IData>();
+
+  // const alertUser = (e: any) => {
+  //   alert(1);
+  //   handleEndConcert();
+  //   e.preventDefault();
+  //   e.returnValue = "Are you sure you want to close this tab?";
+  // };
+
+  // useEffect(() => {
+  //   window.addEventListener("beforeunload", alertUser);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", alertUser);
+  //   };
+  // }, []);
 
   const props: UploadProps = {
     maxCount: 1,
@@ -85,7 +102,7 @@ function App() {
       localStorage.setItem("uuidv4", uuid());
     }
 
-    axios.post("https://api-test.review-ty.com/graphql", {
+    axios.post("https://api.review-ty.com/graphql", {
       operationName: "imageSearchLog",
       variables: {
         data: {
@@ -106,10 +123,11 @@ function App() {
         "device-token": `${localStorage.getItem("uuidv4")}`,
       },
     });
+
     setSocket(newSocket);
     return () => {
-      window.removeEventListener("beforeunload", () => {
-        axios.post("https://api-test.review-ty.com/graphql", {
+      window.removeEventListener("beforeunload", async (e) => {
+        await axios.post("https://api.review-ty.com/graphql", {
           operationName: "imageSearchLog",
           variables: {
             data: {
@@ -129,6 +147,24 @@ function App() {
       newSocket.close();
     };
   }, []);
+
+  const handleEndConcert = async () => {
+    await axios.post("https://api-test.review-ty.com/graphql", {
+      operationName: "imageSearchLog",
+      variables: {
+        data: {
+          name: "test_search",
+          message: JSON.stringify({
+            date: new Date(),
+            "device-token": localStorage.getItem("uuidv4"),
+            status: "destroy",
+          }),
+        },
+      },
+      query:
+        "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
+    });
+  };
 
   useEffect(() => {
     if (isSubmitted || data.length > 0) {

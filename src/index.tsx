@@ -8,6 +8,7 @@ import { DeviceDetectProvider } from "./assets/lib/context/DeviceDetectContext";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
+
 root.render(
   <React.StrictMode>
     <DeviceDetectProvider>
