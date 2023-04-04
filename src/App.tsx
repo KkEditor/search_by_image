@@ -31,7 +31,7 @@ import { io, Socket } from "socket.io-client";
 import Stars from "./assets/components/star/Star";
 import { toLowerCaseNonAccentVietnamese } from "./assets/contants/common";
 import { DeviceDetectContext } from "./assets/lib/context/DeviceDetectContext";
-import { ReloadIcon, TripleDotIcon } from "./assets/svg/icon-svg";
+import { BetaIcon, ReloadIcon, TripleDotIcon } from "./assets/svg/icon-svg";
 const { Dragger } = Upload;
 
 export interface IData {
@@ -257,7 +257,9 @@ function App() {
                     Reviewty AI{" "}
                     <span className="relative">Search - By - Image</span>
                     <span>
-                      <img src={beta} alt="beta" />
+                      <label>
+                        <BetaIcon />
+                      </label>
                     </span>
                   </h2>
                 </div>

@@ -71,7 +71,7 @@ $color-white: white;
             white-space: nowrap;
             margin-bottom: 100px;
             position: absolute;
-            span img {
+            span label {
               position: absolute;
               top: -20px;
             }
@@ -174,7 +174,7 @@ $color-white: white;
             white-space: nowrap;
             margin-bottom: 100px;
             position: absolute;
-            span img {
+            span label {
               position: absolute;
               top: -20px;
             }
@@ -205,7 +205,7 @@ $color-white: white;
           white-space: nowrap;
           margin-bottom: 100px;
           position: absolute;
-          span img {
+          span label {
             position: absolute;
             top: -20px;
           }
@@ -513,7 +513,7 @@ $color-white: white;
         .app-container__right--card-title h2 {
           top: 15%;
 
-          span img {
+          span label {
             right: 30px;
             top: 5px;
             right: 2.5rem;
@@ -567,7 +567,7 @@ $color-white: white;
             text-align: center;
             justify-content: center;
             align-items: center;
-            span img {
+            span label {
               top: 5px;
               right: -1.5rem;
             }
