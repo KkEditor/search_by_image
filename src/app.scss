@@ -284,6 +284,10 @@ $color-white: white;
     padding-bottom: 36px;
   }
 
+  .report {
+    text-decoration: underline;
+  }
+
   .default-upload {
     // max-height: 384px;
     &__wrapper {

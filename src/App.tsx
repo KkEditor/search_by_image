@@ -329,23 +329,35 @@ function App() {
                           <span></span>
                         </div>
 
-                        <a
-                          href={
-                            context.mobile
-                              ? `https://review-ty.com/products/${selectedImage.product_id}`
-                              : `https://community.review-ty.com/search/products/${
-                                  selectedImage.product_id
-                                }/${toLowerCaseNonAccentVietnamese(
-                                  selectedImage.name
-                                )
-                                  .split(" ")
-                                  .join("-")}`
-                          }
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Xem chi tiết
-                        </a>
+                        <div>
+                          <a
+                            style={{ paddingRight: "16px" }}
+                            href={
+                              context.mobile
+                                ? `https://review-ty.com/products/${selectedImage.product_id}`
+                                : `https://community.review-ty.com/search/products/${
+                                    selectedImage.product_id
+                                  }/${toLowerCaseNonAccentVietnamese(
+                                    selectedImage.name
+                                  )
+                                    .split(" ")
+                                    .join("-")}`
+                            }
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Xem chi tiết
+                          </a>
+
+                          <a
+                            href="https://docs.google.com/forms/d/e/1FAIpQLSf54ZMw-u-4YcK4TpN4_iiDkm6cvUEUpPHEJertX8GO7cEeIA/viewform"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="report"
+                          >
+                            Gửi ý kiến phản hồi
+                          </a>
+                        </div>
 
                         <div className="flex justify-center">
                           <div
@@ -474,16 +486,6 @@ function App() {
             </Col>
           </Row>
         </form>
-      </div>
-      <div>
-        <a
-          href="https://docs.google.com/forms/d/e/1FAIpQLSf54ZMw-u-4YcK4TpN4_iiDkm6cvUEUpPHEJertX8GO7cEeIA/viewform"
-          style={{ color: "red" }}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Chúng tôi rất mong nhận được ý kiến của bạn về bản beta
-        </a>
       </div>
     </React.Fragment>
   );
