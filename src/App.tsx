@@ -6,38 +6,32 @@ import {
   Progress,
   Row,
   Space,
-  Spin,
   Upload,
   UploadProps,
 } from "antd";
-import { RcFile, UploadFile } from "antd/es/upload";
-import { SyntheticEvent, useState, useEffect, useRef, useContext } from "react";
-import "./app.scss";
-import noneImage from "./assets/img/none-image.png";
-import logo from "./assets/img/logo.png";
-import bg from "./assets/img/bg.png";
-import beta from "./assets/img/beta.png";
-import axios from "axios";
-import { v4 as uuid } from "uuid";
+import { RcFile } from "antd/es/upload";
+import React, {
+  SyntheticEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Resizer from "react-image-file-resizer";
-import { useNavigate } from "react-router-dom";
-import React from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
-// import { uuid } from "uuid";
+import { v4 as uuid } from "uuid";
+import "./app.scss";
+import beta from "./assets/img/beta.png";
+import bg from "./assets/img/bg.png";
+import logo from "./assets/img/logo.png";
+import noneImage from "./assets/img/none-image.png";
 
 import clsx from "clsx";
 import { io, Socket } from "socket.io-client";
 
-import { ReloadIcon, TripleDotIcon } from "./assets/svg/icon-svg";
 import Stars from "./assets/components/star/Star";
-import { DeviceDetectContext } from "./assets/lib/context/DeviceDetectContext";
 import { toLowerCaseNonAccentVietnamese } from "./assets/contants/common";
-// import { atob } from "buffer";
+import { DeviceDetectContext } from "./assets/lib/context/DeviceDetectContext";
+import { ReloadIcon, TripleDotIcon } from "./assets/svg/icon-svg";
 const { Dragger } = Upload;
 
 export interface IData {
@@ -49,7 +43,6 @@ export interface IData {
 }
 
 function App() {
-  const navigate = useNavigate();
   const context = useContext(DeviceDetectContext);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [percent, setPercent] = useState<[string, number]>(["", 0]);
@@ -102,21 +95,6 @@ function App() {
     if (!localStorage.getItem("uuidv4")) {
       localStorage.setItem("uuidv4", uuid());
     }
-    axios.post("https://api.review-ty.com/graphql", {
-      operationName: "imageSearchLog",
-      variables: {
-        data: {
-          name: "test_search",
-          message: JSON.stringify({
-            date: new Date(),
-            "device-token": localStorage.getItem("uuidv4"),
-            status: "init",
-          }),
-        },
-      },
-      query:
-        "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
-    });
 
     const newSocket = io("https://ai.review-ty.com/", {
       extraHeaders: {

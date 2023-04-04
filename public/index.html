@@ -27,6 +27,7 @@
 
     <!-- device-token -->
     <title>Reviewty AI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.1/axios.min.js"></script>
 
     <script
       async
@@ -40,6 +41,110 @@
       gtag("js", new Date());
       gtag("config", "G-03XWSD8CZ7");
     </script>
+
+    <script language="JavaScript">
+      var url = "https://api.review-ty.com/graphql";
+      window.onunload = confirmExit;
+
+      window.onfocus = function () {
+        axios.post(url, {
+          operationName: "imageSearchLog",
+          variables: {
+            data: {
+              name: "image_search_logs",
+              message: JSON.stringify({
+                date: new Date(),
+                "device-token": localStorage.getItem("uuidv4"),
+                status: "onfocus",
+              }),
+            },
+          },
+          query:
+            "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
+        });
+      };
+
+      window.onblur = function () {
+        axios.post(url, {
+          operationName: "imageSearchLog",
+          variables: {
+            data: {
+              name: "image_search_logs",
+              message: JSON.stringify({
+                date: new Date(),
+                "device-token": localStorage.getItem("uuidv4"),
+                status: "onblur",
+              }),
+            },
+          },
+          query:
+            "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
+        });
+      };
+
+      window.onload = function () {
+        axios.post(url, {
+          operationName: "imageSearchLog",
+          variables: {
+            data: {
+              name: "image_search_logs",
+              message: JSON.stringify({
+                date: new Date(),
+                "device-token": localStorage.getItem("uuidv4"),
+                status: "oninit",
+              }),
+            },
+          },
+          query:
+            "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
+        });
+      };
+
+      function confirmExit() {
+        axios.post(url, {
+          operationName: "imageSearchLog",
+          variables: {
+            data: {
+              name: "image_search_logs",
+              message: JSON.stringify({
+                date: new Date(),
+                "device-token": localStorage.getItem("uuidv4"),
+                status: "ondestroy",
+              }),
+            },
+          },
+          query:
+            "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
+        });
+        var start = new Date().getTime();
+        while (new Date().getTime() < start + 1000);
+
+        return "";
+      }
+    </script>
+
+    <!-- <script type="text/javascript">
+        if (document.readyState == "complete") {
+        }else{
+            window.addEventListener("load", function() {
+                axios.post("https://api.review-ty.com/graphql", {
+                    operationName: "imageSearchLog",
+                    variables: {
+                      data: {
+                        name: "image_search_log",
+                        message: JSON.stringify({
+                          date: new Date(),
+                          "device-token": localStorage.getItem("uuidv4"),
+                          status: "init",
+                        }),
+                      },
+                    },
+                    query:
+                      "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
+                  });
+            }, false);
+    }
+  </script> -->
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
