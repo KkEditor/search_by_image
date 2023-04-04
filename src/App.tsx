@@ -1,4 +1,15 @@
-import { Col, message, Progress, Row, Spin, Upload, UploadProps } from "antd";
+import {
+  Col,
+  Dropdown,
+  MenuProps,
+  message,
+  Progress,
+  Row,
+  Space,
+  Spin,
+  Upload,
+  UploadProps,
+} from "antd";
 import { RcFile, UploadFile } from "antd/es/upload";
 import { SyntheticEvent, useState, useEffect, useRef, useContext } from "react";
 import "./app.scss";
@@ -10,6 +21,7 @@ import axios from "axios";
 import { v4 as uuid } from "uuid";
 import Resizer from "react-image-file-resizer";
 import { useNavigate } from "react-router-dom";
+import React from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -21,7 +33,7 @@ import {
 import clsx from "clsx";
 import { io, Socket } from "socket.io-client";
 
-import { ReloadIcon } from "./assets/svg/icon-svg";
+import { ReloadIcon, TripleDotIcon } from "./assets/svg/icon-svg";
 import Stars from "./assets/components/star/Star";
 import { DeviceDetectContext } from "./assets/lib/context/DeviceDetectContext";
 import { toLowerCaseNonAccentVietnamese } from "./assets/contants/common";
@@ -37,7 +49,7 @@ export interface IData {
 }
 
 function App() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const context = useContext(DeviceDetectContext);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [percent, setPercent] = useState<[string, number]>(["", 0]);
@@ -60,7 +72,25 @@ function App() {
         const base64 = await getBase64(info.file.originFileObj as RcFile);
 
         setCurrentImage(base64);
-        setOriginFile(info.file.originFileObj);
+
+        const resizeFile = (file: any) =>
+          new Promise((resolve) => {
+            Resizer.imageFileResizer(
+              file,
+              500,
+              500,
+              "JPEG",
+              100,
+              0,
+              (uri) => {
+                resolve(uri);
+              },
+              "blob"
+            );
+          });
+
+        const resizer = (await resizeFile(info.file.originFileObj)) as RcFile;
+        setOriginFile(resizer);
         message.success(`${info.file.name} file uploaded successfully.`);
       } else if (status === "error") {
         message.error(`${info.file.name} file upload failed.`);
@@ -69,12 +99,9 @@ function App() {
   };
 
   useEffect(() => {
-    window.addEventListener("beforeunload", handleEndConcert);
-
     if (!localStorage.getItem("uuidv4")) {
       localStorage.setItem("uuidv4", uuid());
     }
-
     axios.post("https://api.review-ty.com/graphql", {
       operationName: "imageSearchLog",
       variables: {
@@ -99,29 +126,9 @@ function App() {
 
     setSocket(newSocket);
     return () => {
-      window.removeEventListener("beforeunload", handleEndConcert);
       newSocket.close();
     };
   }, []);
-
-  const handleEndConcert = async (e: Event) => {
-    e.preventDefault();
-    await axios.post("https://api.review-ty.com/graphql", {
-      operationName: "imageSearchLog",
-      variables: {
-        data: {
-          name: "test_search",
-          message: JSON.stringify({
-            date: new Date(),
-            "device-token": localStorage.getItem("uuidv4"),
-            status: "destroy",
-          }),
-        },
-      },
-      query:
-        "mutation imageSearchLog($data: ActivityLogCreateInput!) {\n  actitvityLogs(data: $data)\n}\n",
-    });
-  };
 
   useEffect(() => {
     if (isSubmitted || data.length > 0) {
@@ -197,232 +204,288 @@ function App() {
     });
   };
 
+  const items: MenuProps["items"] = [
+    {
+      key: "report",
+      label: "Gửi ý kiến phản hồi",
+    },
+  ];
+
   const selectImageHandler = (dataImageSelected: IData) => {
     if (dataImageSelected) setSelectedImage(dataImageSelected);
   };
+
+  const handleMenuClick: MenuProps["onClick"] = (e) => {
+    console.log("click", e);
+
+    if (e.key === "report") {
+      window.open(
+        "https://docs.google.com/forms/d/e/1FAIpQLSf54ZMw-u-4YcK4TpN4_iiDkm6cvUEUpPHEJertX8GO7cEeIA/viewform",
+        "_blank"
+      );
+    }
+  };
+
   return (
-    <div
-      className={clsx("App", {
-        uploaded: !isSubmitted === false,
-      })}
-    >
-      {}
-      <form onSubmit={submitHandler}>
-        <Row className="app-container" gutter={[30, 30]}>
-          <Col
-            xxl={12}
-            xl={12}
-            lg={24}
-            md={24}
-            sm={24}
-            xs={24}
-            className="app-container__left"
-          >
-            <div className="app-container__left--card">
-              <div>
-                <div className="app-container__left--card__logo">
-                  <img src={logo} alt="logo" />
+    <React.Fragment>
+      <div
+        className={clsx("App", {
+          uploaded: !isSubmitted === false,
+        })}
+      >
+        {}
+        <form onSubmit={submitHandler}>
+          <Row className="app-container" gutter={[30, 30]}>
+            <Col
+              xxl={12}
+              xl={12}
+              lg={24}
+              md={24}
+              sm={24}
+              xs={24}
+              className="app-container__left"
+            >
+              <div className="app-container__left--card">
+                <div>
+                  <div className="app-container__left--card__logo">
+                    <img src={logo} alt="logo" />
+                  </div>
+
+                  <h1>Convert your image to Product image in one click.</h1>
+
+                  <p>
+                    Simply drag & drop a file in your device on the right and we
+                    will convert your image to product image what you find
+                  </p>
                 </div>
 
-                <h1>Convert your image to Product image in one click.</h1>
-
-                <p>
-                  Simply drag & drop a file in your device on the right and we
-                  will convert your image to product image what you find
-                </p>
+                <div className="app-container__left--card__img">
+                  <img src={bg} alt="logo" />
+                </div>
               </div>
+            </Col>
+            <Col
+              xxl={12}
+              xl={12}
+              lg={24}
+              md={24}
+              sm={24}
+              xs={24}
+              className={clsx("app-container__right", {})}
+            >
+              <div className="app-container__right--card">
+                <div className="app-container__right--card-title">
+                  <h2>
+                    Reviewty AI{" "}
+                    <span className="relative">Search - By - Image</span>
+                    <span>
+                      <img src={beta} alt="beta" />
+                    </span>
+                  </h2>
+                </div>
 
-              <div className="app-container__left--card__img">
-                <img src={bg} alt="logo" />
-              </div>
-            </div>
-          </Col>
-          <Col
-            xxl={12}
-            xl={12}
-            lg={24}
-            md={24}
-            sm={24}
-            xs={24}
-            className={clsx("app-container__right", {})}
-          >
-            <div className="app-container__right--card">
-              <div className="app-container__right--card-title">
-                <h2>
-                  Reviewty AI{" "}
-                  <span className="relative">Search - By - Image</span>
-                  <span>
-                    <img src={beta} alt="beta" />
-                  </span>
-                </h2>
-              </div>
+                <Row
+                  className={"upload-content__results"}
+                  ref={bottomRef}
+                  style={{
+                    padding: "36px",
+                  }}
+                >
+                  {selectedImage ? (
+                    <Col span={24} style={{ background: "transparent" }}>
+                      <div style={{ paddingBottom: "30px" }}>
+                        <div className="flex justify-space-between">
+                          <h3 className="pt-3">{selectedImage.name}</h3>
 
-              <Row
-                className={"upload-content__results"}
-                ref={bottomRef}
-                style={{
-                  padding: "36px",
-                }}
-              >
-                {selectedImage ? (
-                  <Col span={24} style={{ background: "transparent" }}>
-                    <div style={{ paddingBottom: "30px" }}>
-                      <h3 className="pt-3">{selectedImage.name}</h3>
-
-                      <div className="pt-3">
-                        <Stars
-                          ratingNumber={Number(selectedImage.review_avg_rate)}
-                        />
-                        <span style={{ marginLeft: "8px" }}>
-                          {selectedImage.review_avg_rate.slice(0, 3)} (
-                          {selectedImage.review_count})
-                        </span>
-                        <span></span>
-                      </div>
-
-                      <a
-                        href={
-                          context.mobile
-                            ? `https://review-ty.com/products/${selectedImage.product_id}`
-                            : `https://community.review-ty.com/search/products/${
-                                selectedImage.product_id
-                              }/${toLowerCaseNonAccentVietnamese(
-                                selectedImage.name
-                              )
-                                .split(" ")
-                                .join("-")}`
-                        }
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Xem chi tiết
-                      </a>
-
-                      <div className="flex justify-center">
-                        <div
-                          className="background-image"
-                          style={{
-                            backgroundImage: `url(${selectedImage.url})`,
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  </Col>
-                ) : (
-                  <Col
-                    span={24}
-                    className="flex justify-center items-center flex-column"
-                  >
-                    <label>{percent[0]}</label>
-                    <Progress percent={percent[1]} />
-                  </Col>
-                )}
-
-                {data?.map((root) => (
-                  <Col
-                    className="cursor-pointer"
-                    span={4}
-                    key={Number(root?.product_id)}
-                    onClick={() => selectImageHandler(root)}
-                  >
-                    <div>
-                      <img
-                        className={clsx("w-full", {
-                          "image-selected":
-                            root.product_id === selectedImage?.product_id,
-                        })}
-                        src={root?.url}
-                        alt={root.name}
-                      />
-                    </div>
-                  </Col>
-                ))}
-              </Row>
-              <div>
-                <div style={{ padding: "10px" }}>
-                  <div
-                    className={`upload-content ${isSubmitted && "show-image"}`}
-                  >
-                    <div style={{ padding: "10px" }} className="relative">
-                      <h3 style={{ paddingBottom: "24px" }}>
-                        Upload your file
-                      </h3>
-
-                      <Dragger
-                        className={clsx({
-                          "current-image-uploaded": currentImage,
-                        })}
-                        customRequest={dummyRequest}
-                        {...props}
-                        beforeUpload={(file) => {
-                          const isJPG =
-                            file.type === "image/jpeg" ||
-                            file.type === "image/png";
-                          if (!isJPG) {
-                            message.error(
-                              "You can only upload JPG or PNG file!"
-                            );
-                            return false;
-                          } else {
-                            return true;
-                          }
-                        }}
-                      >
-                        {currentImage ? (
-                          <div className="upload-content__show-image">
-                            <div
-                              className="background-image"
-                              style={{
-                                backgroundImage: `url(${currentImage})`,
-                              }}
-                            ></div>
-                          </div>
-                        ) : (
-                          <div className="default-upload">
-                            <div className="default-upload__wrapper">
-                              <img src={noneImage} alt="noneImage" />
-                              <h2>Click to upload</h2>
-                              <span>or drag and drop it here</span>
+                          <div
+                            style={{ position: "relative", cursor: "pointer" }}
+                          >
+                            <div style={{ position: "absolute" }}>
+                              <Dropdown
+                                trigger={["click"]}
+                                menu={{
+                                  onClick: handleMenuClick,
+                                  items,
+                                  selectable: true,
+                                  defaultSelectedKeys: ["3"],
+                                }}
+                              >
+                                <Space>
+                                  <TripleDotIcon />
+                                </Space>
+                              </Dropdown>
                             </div>
                           </div>
-                        )}
-                      </Dragger>
+                        </div>
 
-                      <div className="btn-group flex">
-                        <button
-                          disabled={loading}
-                          className={clsx("btn-clear", {
-                            "btn-disabled": loading,
-                          })}
-                          type="button"
-                          onClick={reloadHandler}
+                        <div className="pt-3">
+                          <Stars
+                            ratingNumber={Number(selectedImage.review_avg_rate)}
+                          />
+                          <span style={{ marginLeft: "8px" }}>
+                            {selectedImage.review_avg_rate.slice(0, 3)} (
+                            {selectedImage.review_count})
+                          </span>
+                          <span></span>
+                        </div>
+
+                        <a
+                          href={
+                            context.mobile
+                              ? `https://review-ty.com/products/${selectedImage.product_id}`
+                              : `https://community.review-ty.com/search/products/${
+                                  selectedImage.product_id
+                                }/${toLowerCaseNonAccentVietnamese(
+                                  selectedImage.name
+                                )
+                                  .split(" ")
+                                  .join("-")}`
+                          }
+                          target="_blank"
+                          rel="noreferrer"
                         >
-                          <ReloadIcon />
-                        </button>
-                        <button
-                          className={clsx("btn-submit", {
-                            "btn-disabled": loading,
-                          })}
-                          type="submit"
-                          disabled={loading || isSubmitted}
-                        >
-                          Submit
-                        </button>
+                          Xem chi tiết
+                        </a>
+
+                        <div className="flex justify-center">
+                          <div
+                            className="background-image"
+                            style={{
+                              backgroundImage: `url(${selectedImage.url})`,
+                            }}
+                          ></div>
+                        </div>
                       </div>
-                    </div>
+                    </Col>
+                  ) : (
+                    <Col
+                      span={24}
+                      className="flex justify-center items-center flex-column"
+                    >
+                      <label>{percent[0]}</label>
+                      <Progress percent={percent[1]} />
+                    </Col>
+                  )}
 
-                    <p>
-                      Simply drag & drop a file in your device on the right and
-                      we will convert your image to product image what you find
-                    </p>
+                  {data?.map((root) => (
+                    <Col
+                      className="cursor-pointer"
+                      span={4}
+                      key={Number(root?.product_id)}
+                      onClick={() => selectImageHandler(root)}
+                    >
+                      <div>
+                        <img
+                          className={clsx("w-full", {
+                            "image-selected":
+                              root.product_id === selectedImage?.product_id,
+                          })}
+                          src={root?.url}
+                          alt={root.name}
+                        />
+                      </div>
+                    </Col>
+                  ))}
+                </Row>
+                <div>
+                  <div style={{ padding: "10px" }}>
+                    <div
+                      className={`upload-content ${
+                        isSubmitted && "show-image"
+                      }`}
+                    >
+                      <div style={{ padding: "10px" }} className="relative">
+                        <h3 style={{ paddingBottom: "24px" }}>
+                          Upload your file
+                        </h3>
+
+                        <Dragger
+                          className={clsx({
+                            "current-image-uploaded": currentImage,
+                          })}
+                          customRequest={dummyRequest}
+                          {...props}
+                          beforeUpload={(file) => {
+                            const isJPG =
+                              file.type === "image/jpeg" ||
+                              file.type === "image/png";
+                            if (!isJPG) {
+                              message.error(
+                                "You can only upload JPG or PNG file!"
+                              );
+                              return false;
+                            } else {
+                              return true;
+                            }
+                          }}
+                        >
+                          {currentImage ? (
+                            <div className="upload-content__show-image">
+                              <div
+                                className="background-image"
+                                style={{
+                                  backgroundImage: `url(${currentImage})`,
+                                }}
+                              ></div>
+                            </div>
+                          ) : (
+                            <div className="default-upload">
+                              <div className="default-upload__wrapper">
+                                <img src={noneImage} alt="noneImage" />
+                                <h2>Click to upload</h2>
+                                <span>or drag and drop it here</span>
+                              </div>
+                            </div>
+                          )}
+                        </Dragger>
+
+                        <div className="btn-group flex">
+                          <button
+                            disabled={loading}
+                            className={clsx("btn-clear", {
+                              "btn-disabled": loading,
+                            })}
+                            type="button"
+                            onClick={reloadHandler}
+                          >
+                            <ReloadIcon />
+                          </button>
+                          <button
+                            className={clsx("btn-submit", {
+                              "btn-disabled": loading,
+                            })}
+                            type="submit"
+                            disabled={loading || isSubmitted}
+                          >
+                            Submit
+                          </button>
+                        </div>
+                      </div>
+
+                      <p>
+                        Simply drag & drop a file in your device on the right
+                        and we will convert your image to product image what you
+                        find.{" "}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </Col>
-        </Row>
-      </form>
-    </div>
+            </Col>
+          </Row>
+        </form>
+      </div>
+      <div>
+        <a
+          href="https://docs.google.com/forms/d/e/1FAIpQLSf54ZMw-u-4YcK4TpN4_iiDkm6cvUEUpPHEJertX8GO7cEeIA/viewform"
+          style={{ color: "red" }}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Chúng tôi rất mong nhận được ý kiến của bạn về bản beta
+        </a>
+      </div>
+    </React.Fragment>
   );
 }
 

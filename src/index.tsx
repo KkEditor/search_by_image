@@ -15,6 +15,7 @@ root.render(
       <Router>
         <Routes>
           <Route path="/*" element={<App />} />
+          <Route path="/:id" element={<div>hehe</div>} />
         </Routes>
       </Router>
     </DeviceDetectProvider>

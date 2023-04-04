@@ -21,4 +21,20 @@ const ReloadIcon = () => {
   );
 };
 
-export { ReloadIcon };
+const TripleDotIcon = () => {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="4.8" cy="12.0002" r="1.8" fill="#404040" />
+      <circle cx="12" cy="12.0002" r="1.8" fill="#404040" />
+      <circle cx="19.2" cy="12.0002" r="1.8" fill="#404040" />
+    </svg>
+  );
+};
+
+export { ReloadIcon, TripleDotIcon };
