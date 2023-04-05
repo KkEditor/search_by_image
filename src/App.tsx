@@ -11,6 +11,8 @@ import {
 } from "antd";
 import { RcFile } from "antd/es/upload";
 import React, {
+  MouseEvent,
+  MouseEventHandler,
   SyntheticEvent,
   useContext,
   useEffect,
@@ -182,26 +184,16 @@ function App() {
     });
   };
 
-  const items: MenuProps["items"] = [
-    {
-      key: "report",
-      label: "Gửi ý kiến phản hồi",
-    },
-  ];
-
   const selectImageHandler = (dataImageSelected: IData) => {
     if (dataImageSelected) setSelectedImage(dataImageSelected);
   };
 
-  const handleMenuClick: MenuProps["onClick"] = (e) => {
-    console.log("click", e);
-
-    if (e.key === "report") {
-      window.open(
-        "https://docs.google.com/forms/d/e/1FAIpQLSf54ZMw-u-4YcK4TpN4_iiDkm6cvUEUpPHEJertX8GO7cEeIA/viewform",
-        "_blank"
-      );
+  const handleReport = (): void => {
+    if (originFile) {
+      socket?.emit("fail_image", originFile);
     }
+
+    return;
   };
 
   return (
@@ -276,26 +268,6 @@ function App() {
                       <div style={{ paddingBottom: "30px" }}>
                         <div className="flex justify-space-between">
                           <h3 className="pt-3">{selectedImage.name}</h3>
-
-                          <div
-                            style={{ position: "relative", cursor: "pointer" }}
-                          >
-                            <div style={{ position: "absolute" }}>
-                              <Dropdown
-                                trigger={["click"]}
-                                menu={{
-                                  onClick: handleMenuClick,
-                                  items,
-                                  selectable: true,
-                                  defaultSelectedKeys: ["3"],
-                                }}
-                              >
-                                <Space>
-                                  <TripleDotIcon />
-                                </Space>
-                              </Dropdown>
-                            </div>
-                          </div>
                         </div>
 
                         <div className="pt-3">
@@ -334,6 +306,7 @@ function App() {
                             target="_blank"
                             rel="noreferrer"
                             className="report"
+                            onClick={handleReport}
                           >
                             Gửi ý kiến phản hồi
                           </a>
